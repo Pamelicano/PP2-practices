@@ -15,4 +15,4 @@ while i < 6:
   i += 1
 else:
   print("i is no longer less than 6")
-  
+# In this example, the else block will be executed when the condition i < 6 becomes false.
