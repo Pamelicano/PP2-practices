@@ -1,5 +1,6 @@
 # Practice 2 supplies
 
+```text
 Practice2/
 ├── boolean/
 │   ├── boolean_intro.py
