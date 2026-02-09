@@ -1,0 +1,26 @@
+# Functions can return values using the return statement:
+
+def add_numbers(x, y):
+  return x + y
+
+result = add_numbers(5, 3)
+print(result)
+
+# Functions can return any data type, including lists, tuples, dictionaries, and more.
+
+def my_function():
+  return ["apple", "banana", "cherry"]
+
+fruits = my_function()
+print(fruits[0])
+print(fruits[1])
+print(fruits[2])
+
+# A function that returns a tuple:
+
+def my_function():
+  return (10, 20)
+
+x, y = my_function()
+print("x:", x)
+print("y:", y)
