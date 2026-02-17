@@ -5,5 +5,11 @@ while i < 6:
     if i == 3:
         break
     i += 1
+
+while True:
+    n = input()
+    if (n == "exit"):
+        break
+
 # In this example, the loop will stop when i is equal to 3, even though the condition i < 6 is still true.
 

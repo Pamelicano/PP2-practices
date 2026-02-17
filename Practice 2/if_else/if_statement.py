@@ -35,7 +35,7 @@ You can have multiple statements inside an if block. All statements must be inde
 """
 
 age = 20
-if age >= 18:
+if age >= 18 and age <= 30:
   print("You are an adult")
   print("You can vote")
   print("You have full legal rights")
