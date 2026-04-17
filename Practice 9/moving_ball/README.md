@@ -1,4 +1,4 @@
-# A simple Pygae=me code for moving ball around
+# A simple Pygame code for moving ball around
 ```text
 ├── moving_ball/
 │   ├── main.py
