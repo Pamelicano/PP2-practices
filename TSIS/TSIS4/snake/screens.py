@@ -82,3 +82,37 @@ def draw_leaderboard(screen, data):
     screen.blit(hint, (180, 350))
 
     pygame.display.update()
+
+
+def draw_game_over(screen, font, score, level, best):
+    screen.fill((245, 245, 245))
+
+    title = font.render("GAME OVER", True, (0, 0, 0))
+    screen.blit(title, (220, 80))
+
+    s = font.render(f"Score: {score}", True, (0, 0, 0))
+    l = font.render(f"Level: {level}", True, (0, 0, 0))
+    b = font.render(f"Best: {best}", True, (0, 0, 0))
+
+    screen.blit(s, (240, 140))
+    screen.blit(l, (240, 170))
+    screen.blit(b, (240, 200))
+
+    hint = font.render("R - Retry | M - Menu", True, (100, 100, 100))
+    screen.blit(hint, (180, 300))
+
+
+def draw_settings(screen, font, settings):
+    screen.fill((245, 245, 245))
+
+    title = font.render("SETTINGS", True, (0, 0, 0))
+    screen.blit(title, (240, 80))
+
+    grid = font.render(f"Grid: {settings['grid']} (G)", True, (0, 0, 0))
+    sound = font.render(f"Sound: {settings['sound']} (S)", True, (0, 0, 0))
+
+    screen.blit(grid, (200, 140))
+    screen.blit(sound, (200, 170))
+
+    hint = font.render("ESC - Back | G - Toggle Grid | S - Toggle Sound", True, (100, 100, 100))
+    screen.blit(hint, (80, 300))

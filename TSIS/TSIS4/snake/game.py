@@ -1,6 +1,5 @@
 import pygame
 import random
-import time
 
 from config import *
 from db import save_game, get_best
@@ -20,12 +19,11 @@ BLUE = (0, 120, 255)
 GOLD = (255, 200, 0)
 POISON = (80, 0, 0)
 
-
 FOOD_TYPES = [
-    ("normal", RED, 1, 10, 70),
-    ("rare", BLUE, 3, 7, 15),
-    ("gold", GOLD, 5, 5, 5),
-    ("poison", POISON, -2, 8, 10)
+    ("normal", RED, 1, 10000, 70),
+    ("rare", BLUE, 3, 7000, 15),
+    ("gold", GOLD, 5, 5000, 5),
+    ("poison", POISON, -2, 8000, 10)
 ]
 
 POWER_TYPES = [
@@ -43,14 +41,14 @@ def choose_food():
     total = sum(f[4] for f in FOOD_TYPES)
     r = random.randint(1, total)
 
-    current = 0
+    cur = 0
     for f in FOOD_TYPES:
-        current += f[4]
-        if r <= current:
+        cur += f[4]
+        if r <= cur:
             return f
 
 
-def generate_food(snake, obstacles, head):
+def generate_food(snake, obstacles, head, now):
     food_type = choose_food()
 
     while True:
@@ -59,11 +57,7 @@ def generate_food(snake, obstacles, head):
             random.randrange(0, SCREEN_HEIGHT, BLOCK)
         ]
 
-        if pos in snake:
-            continue
-        if pos in obstacles:
-            continue
-        if is_too_close(head, pos):
+        if pos in snake or pos in obstacles or is_too_close(head, pos):
             continue
 
         return {
@@ -71,19 +65,19 @@ def generate_food(snake, obstacles, head):
             "type": food_type[0],
             "color": food_type[1],
             "value": food_type[2],
-            "spawn_time": time.time(),
+            "spawn_time": now,
             "lifetime": food_type[3]
         }
 
 
-def should_draw_food(food):
-    remaining = food["lifetime"] - (time.time() - food["spawn_time"])
+def should_draw_food(food, now):
+    remaining = food["lifetime"] - (now - food["spawn_time"])
 
     if remaining <= 0:
         return False
 
-    if remaining < 2:
-        return int(time.time() * 8) % 2 == 0
+    if remaining < 2000:
+        return (now // 120) % 2 == 0
 
     return True
 
@@ -97,11 +91,7 @@ def generate_obstacles(level, snake, head):
             random.randrange(0, SCREEN_HEIGHT, BLOCK)
         ]
 
-        if pos in snake:
-            continue
-        if is_too_close(head, pos):
-            continue
-        if pos in obstacles:
+        if pos in snake or pos in obstacles or is_too_close(head, pos):
             continue
 
         obstacles.append(pos)
@@ -109,7 +99,7 @@ def generate_obstacles(level, snake, head):
     return obstacles
 
 
-def spawn_power_up():
+def spawn_power_up(now):
     t = random.choice(POWER_TYPES)
 
     return {
@@ -119,7 +109,7 @@ def spawn_power_up():
             random.randrange(0, SCREEN_WIDTH, BLOCK),
             random.randrange(0, SCREEN_HEIGHT, BLOCK)
         ],
-        "spawn_time": pygame.time.get_ticks()
+        "spawn_time": now
     }
 
 
@@ -137,7 +127,8 @@ def game_loop(player_id):
     level = 1
 
     obstacles = []
-    food = generate_food(snake, obstacles, snake[-1])
+    now = pygame.time.get_ticks()
+    food = generate_food(snake, obstacles, snake[-1], now)
 
     power_up = None
     power_spawn_time = 0
@@ -153,8 +144,8 @@ def game_loop(player_id):
 
     while running:
 
-        screen.fill(WHITE)
         now = pygame.time.get_ticks()
+        screen.fill(WHITE)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -200,10 +191,10 @@ def game_loop(player_id):
             if head == o:
                 return
 
+        # POWER-UP SPAWN
         if power_up is None:
-            power_up = spawn_power_up()
+            power_up = spawn_power_up(now)
             power_spawn_time = now
-
         elif now - power_spawn_time > 8000:
             power_up = None
 
@@ -225,13 +216,13 @@ def game_loop(player_id):
 
             power_up = None
 
-        if now > power_end_time:
+        if speed_multiplier != 1 and now > power_end_time:
             speed_multiplier = 1
 
-        if time.time() - food["spawn_time"] > food["lifetime"]:
-            food = generate_food(snake, obstacles, head)
+        if now - food["spawn_time"] > food["lifetime"]:
+            food = generate_food(snake, obstacles, head, now)
 
-        if should_draw_food(food):
+        if should_draw_food(food, now):
             pygame.draw.rect(screen, food["color"], (*food["pos"], BLOCK, BLOCK))
 
         if head == food["pos"]:
@@ -239,7 +230,6 @@ def game_loop(player_id):
             if food["type"] == "poison":
                 length = max(1, length - 2)
                 snake = snake[-length:]
-
                 if length <= 1:
                     return
             else:
@@ -247,7 +237,7 @@ def game_loop(player_id):
                 score += food["value"]
 
             level = score // 5 + 1
-            food = generate_food(snake, obstacles, head)
+            food = generate_food(snake, obstacles, head, now)
 
         for s in snake:
             pygame.draw.rect(screen, (0, 180, 0), (*s, BLOCK, BLOCK))
@@ -258,7 +248,6 @@ def game_loop(player_id):
 
         pygame.display.update()
 
-        clock.tick((BASE_SPEED + level * 2) * speed_multiplier)
+        clock.tick(max(1, int((BASE_SPEED + level * 2) * speed_multiplier)))
 
     save_game(player_id, score, level)
-    best = get_best(player_id)
